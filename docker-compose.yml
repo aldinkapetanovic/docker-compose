@@ -7,16 +7,27 @@ services:
       - "3000:3000"
     volumes:
       - ./web:/app
+    command: npm start
+  db:
+    build: ./db
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./db:/app
     environment:
       - NODE_ENV=production
-    command: npm start
-
+    command: mongod
+  seed:
+    build: ./seed
+    command: mongoimport --host db --db mydb --collection users --file /seed/data.json --jsonArray
+    depends_on:
+      - db
   server:
     build: ./server
+    depends_on:
+      - db
     ports:
       - "8080:8080"
     volumes:
       - ./server:/app
-    environment:
-      - NODE_ENV=production
     command: npm start
